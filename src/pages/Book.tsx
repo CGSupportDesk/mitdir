@@ -34,16 +34,22 @@ const services = [
 export default function Book() {
   const [step, setStep] = useState(1)
   const [form, setForm] = useState<Booking>(initial)
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState('')
   const navigate = useNavigate()
   const update = <K extends keyof Booking>(key: K, value: Booking[K]) => setForm(v => ({ ...v, [key]: value }))
   const canContinue = useMemo(() => step === 1 ? !!form.service : step === 2 ? !!form.date && !!form.time && !!form.address : step === 3 ? true : !!form.name && !!form.phone, [form, step])
 
-  function submit(e: FormEvent) {
+  async function submit(e: FormEvent) {
     e.preventDefault()
     if (!canContinue) return
-    const record = { ...form, id: `MD-${Math.floor(10000 + Math.random() * 89999)}`, createdAt: new Date().toISOString(), status: 'Request received' }
-    localStorage.setItem('mitdir-booking', JSON.stringify(record))
-    navigate('/dashboard?new=1')
+    setBusy(true);setError('')
+    try {
+      const response=await fetch('/api/public-request',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(form)})
+      const result=await response.json()
+      if(!response.ok)throw new Error(result.error||'Could not send the request')
+      navigate(`/request-confirmed?ref=${encodeURIComponent(result.reference)}`)
+    } catch(err){setError((err as Error).message)} finally{setBusy(false)}
   }
 
   return (
@@ -70,7 +76,8 @@ export default function Book() {
 
               {step === 4 && <div className="form-step"><div className="form-heading"><span className="form-heading__icon"><UserRound /></span><div><h2>Who should we contact?</h2><p>We will call to confirm the request and explain the estimated cost.</p></div></div><label className="field"><span>Your name *</span><input required placeholder="Full name" value={form.name} onChange={e => update('name', e.target.value)} /></label><div className="field-grid"><label className="field"><span>Phone number *</span><input required type="tel" placeholder="+49" value={form.phone} onChange={e => update('phone', e.target.value)} /></label><label className="field"><span>Email</span><input type="email" placeholder="you@example.com" value={form.email} onChange={e => update('email', e.target.value)} /></label></div><div className="summary-card"><div><span>Support</span><strong>{form.service}</strong></div><div><span>When</span><strong>{form.date} at {form.time}</strong></div><div><span>Where</span><strong>{form.address}</strong></div></div><p className="consent-copy">By sending this request, you agree that MitDir may contact you about this booking. No payment is taken now.</p></div>}
 
-              <div className="form-actions">{step > 1 ? <button className="button button--back" type="button" onClick={() => setStep(v => v - 1)}><ArrowLeft /> Back</button> : <span />} {step < 4 ? <button className="button" type="button" disabled={!canContinue} onClick={() => canContinue && setStep(v => v + 1)}>Continue <ArrowRight /></button> : <button className="button" type="submit" disabled={!canContinue}>Send request <ArrowRight /></button>}</div>
+              {error&&<div className="form-error">{error}</div>}
+              <div className="form-actions">{step > 1 ? <button className="button button--back" type="button" onClick={() => setStep(v => v - 1)}><ArrowLeft /> Back</button> : <span />} {step < 4 ? <button className="button" type="button" disabled={!canContinue} onClick={() => canContinue && setStep(v => v + 1)}>Continue <ArrowRight /></button> : <button className="button" type="submit" disabled={!canContinue||busy}>{busy?'Sending…':'Send request'} <ArrowRight /></button>}</div>
             </form>
           </section>
         </div>

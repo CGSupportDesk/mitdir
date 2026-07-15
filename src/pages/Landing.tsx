@@ -148,7 +148,7 @@ export default function Landing() {
         </section>
       </main>
       <footer className="footer">
-        <div className="container footer__grid"><div><Logo light /><p>Everyday help. Right by your side.<br />Non-clinical support coordinated with care.</p></div><div><strong>Explore</strong><a href="/#services">Services</a><a href="/#how">How it works</a><a href="/#safety">Trust & safety</a></div><div><strong>For families</strong><Link to="/book">Book support</Link><Link to="/dashboard">Family dashboard</Link><a href="tel:+497211234567">Telephone concierge</a></div><div><strong>Pilot region</strong><p>Karlsruhe<br />Baden-Württemberg, Germany</p></div></div>
+        <div className="container footer__grid"><div><Logo light /><p>Everyday help. Right by your side.<br />Non-clinical support coordinated with care.</p></div><div><strong>Explore</strong><a href="/#services">Services</a><a href="/#how">How it works</a><a href="/#safety">Trust & safety</a></div><div><strong>For families</strong><Link to="/book">Book support</Link><Link to="/app">Family dashboard</Link><a href="tel:+497211234567">Telephone concierge</a></div><div><strong>Pilot region</strong><p>Karlsruhe<br />Baden-Württemberg, Germany</p></div></div>
         <div className="container footer__bottom"><span>© 2026 MitDir. A Beyond ClosingGap initiative.</span><span>Privacy · Imprint · Accessibility</span></div>
       </footer>
     </div>

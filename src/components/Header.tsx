@@ -14,7 +14,7 @@ export default function Header({ compact = false }: { compact?: boolean }) {
         </button>
         <nav className={`nav ${open ? 'nav--open' : ''}`} aria-label="Main navigation">
           {!compact && <><a href="/#services">Services</a><a href="/#how">How it works</a><a href="/#safety">Safety</a></>}
-          <Link to="/dashboard">Family dashboard</Link>
+          <Link to="/app">Sign in</Link>
           <a className="nav__phone" href="tel:+497211234567"><Phone size={17} /> +49 721 123 4567</a>
           <Link className="button button--small" to="/book">Book support</Link>
         </nav>

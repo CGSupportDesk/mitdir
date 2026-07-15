@@ -10,5 +10,9 @@ tmp
 vite.config.js
 vite.config.d.ts
 .DS_Store
+.agents/
+skills-lock.json
+.vercel-dev*.log
 
 .vercel
+.env*
