@@ -223,8 +223,11 @@ CREATE TABLE IF NOT EXISTS public_support_requests (
   contact_email TEXT,
   status TEXT NOT NULL DEFAULT 'new' CHECK (status IN ('new','contacted','converted','closed')),
   ip_hash TEXT,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+ALTER TABLE public_support_requests ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
 
 CREATE INDEX IF NOT EXISTS idx_bookings_status_date ON bookings(status, scheduled_at);
 CREATE INDEX IF NOT EXISTS idx_bookings_created_by ON bookings(created_by);
