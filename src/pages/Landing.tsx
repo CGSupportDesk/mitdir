@@ -33,6 +33,7 @@ export default function Landing() {
       <Header />
       <main>
         <section className="hero">
+          <div className="hero__background" role="img" aria-label="A caregiver supporting an older woman as they walk together outdoors" />
           <div className="hero__wash" />
           <div className="container hero__inner">
             <div className="hero__copy reveal">
@@ -50,7 +51,6 @@ export default function Landing() {
               </div>
             </div>
             <div className="hero__visual">
-              <div className="hero__image-wrap"><img src="/images/hero-sky.webp" alt="A caregiver supporting an older woman as they walk together outdoors" /></div>
               <div className="journey-card">
                 <div className="journey-card__icon"><Check /></div>
                 <div><span>Journey completed</span><strong>Anna is safely home</strong><small>Family updated at 15:42</small></div>
