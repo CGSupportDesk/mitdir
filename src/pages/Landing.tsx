@@ -1,6 +1,6 @@
 import {
-  ArrowRight, CalendarCheck, Check, ChevronDown, ClipboardCheck, HeartHandshake,
-  Home, MapPin, Pill, Phone, ShieldCheck, ShoppingBag, Sparkles, Users, Waypoints,
+  ArrowRight, CalendarCheck, Check, ChevronDown, HeartHandshake,
+  Home, MapPin, Pill, Phone, ShieldCheck, ShoppingBag, Users, Waypoints,
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import Header from '../components/Header'
@@ -30,32 +30,19 @@ const faqs = [
 export default function Landing() {
   return (
     <div className="landing">
-      <Header />
+      <Header overlay />
       <main>
         <section className="hero">
-          <div className="hero__background" role="img" aria-label="A caregiver supporting an older woman as they walk together outdoors" />
+          <div className="hero__background" role="img" aria-label="A trusted companion supporting an older woman in a sunny park" />
           <div className="hero__wash" />
           <div className="container hero__inner">
             <div className="hero__copy reveal">
-              <div className="eyebrow eyebrow--light"><Sparkles size={15} /> Everyday help, thoughtfully coordinated</div>
               <h1>Your day, made easier.<br /><em>Right by your side.</em></h1>
               <p>One trusted place to arrange practical support for older adults - from hospital appointments to errands, companionship and a safe return home.</p>
               <div className="hero__actions">
                 <Link className="button button--gold" to="/book">Book support <ArrowRight size={18} /></Link>
                 <a className="button button--ghost" href="tel:+497211234567"><Phone size={18} /> Call our concierge</a>
               </div>
-              <div className="hero__trust">
-                <span><ShieldCheck /> Verified partners</span>
-                <span><ClipboardCheck /> Clear consent</span>
-                <span><HeartHandshake /> Human support</span>
-              </div>
-            </div>
-            <div className="hero__visual">
-              <div className="journey-card">
-                <div className="journey-card__icon"><Check /></div>
-                <div><span>Journey completed</span><strong>Anna is safely home</strong><small>Family updated at 15:42</small></div>
-              </div>
-              <div className="hero__location"><MapPin /> Pilot region<br /><strong>Karlsruhe</strong></div>
             </div>
           </div>
         </section>

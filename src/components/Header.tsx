@@ -3,12 +3,12 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import Logo from './Logo'
 
-export default function Header({ compact = false }: { compact?: boolean }) {
+export default function Header({ compact = false, overlay = false }: { compact?: boolean; overlay?: boolean }) {
   const [open, setOpen] = useState(false)
   return (
-    <header className={`site-header ${compact ? 'site-header--compact' : ''}`}>
+    <header className={`site-header ${compact ? 'site-header--compact' : ''} ${overlay ? 'site-header--overlay' : ''}`}>
       <div className="container site-header__inner">
-        <Logo />
+        <Logo light={overlay} />
         <button className="menu-button" onClick={() => setOpen(!open)} aria-expanded={open} aria-label="Toggle navigation">
           {open ? <X /> : <Menu />}
         </button>
