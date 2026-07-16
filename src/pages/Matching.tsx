@@ -1,0 +1,15 @@
+import { CheckCircle2,RefreshCcw,Sparkles,Star,UsersRound } from 'lucide-react'
+import { useCallback,useEffect,useState } from 'react'
+import { api } from '../lib/api'
+
+type Row=Record<string,unknown>
+export default function Matching(){
+  const [bookings,setBookings]=useState<Row[]>([]);const [selected,setSelected]=useState('');const [matches,setMatches]=useState<Row[]>([]);const [error,setError]=useState('');const [notice,setNotice]=useState('');const [busy,setBusy]=useState(false)
+  useEffect(()=>{void api<{items:Row[]}>('/api/data?module=bookings').then(r=>{const open=r.items.filter(item=>!['completed','cancelled'].includes(String(item.status)));setBookings(open);setSelected(String(open[0]?.id||''))}).catch(e=>setError((e as Error).message))},[])
+  const load=useCallback(async(id:string)=>{if(!id)return;const r=await api<{items:Row[]}>(`/api/platform?module=matching&bookingId=${id}`);setMatches(r.items)},[])
+  useEffect(()=>{if(selected)void Promise.resolve().then(()=>load(selected)).catch(e=>setError((e as Error).message))},[selected,load])
+  async function generate(){setBusy(true);setError('');try{await api('/api/platform?module=matching',{method:'POST',body:JSON.stringify({bookingId:selected})});await load(selected);setNotice('Suggestions refreshed from verification, availability, language, skills, rating and continuity factors.')}catch(e){setError((e as Error).message)}finally{setBusy(false)}}
+  return <div className="portal-page"><div className="module-heading"><div><span className="portal-kicker">Explainable dispatch</span><h1>Partner matching</h1><p>Review ranked suggestions; the operations team always makes the final assignment.</p></div><button className="button" disabled={!selected||busy} onClick={()=>void generate()}><Sparkles/>{busy?'Matching…':'Generate suggestions'}</button></div>{notice&&<div className="portal-notice"><CheckCircle2/><span>{notice}</span></div>}{error&&<div className="portal-error">{error}</div>}
+    <section className="portal-panel"><label className="field"><span>Booking to match</span><select value={selected} onChange={e=>setSelected(e.target.value)}><option value="">Select…</option>{bookings.map(item=><option key={String(item.id)} value={String(item.id)}>{String(item.booking_number)} · {String(item.senior||item.service)}</option>)}</select></label></section><div className="match-grid">{matches.map((item,index)=><article className="portal-panel match-card" key={String(item.id)}><span className="match-rank">#{index+1}</span><div className="match-score"><strong>{String(item.score)}</strong><small>match score</small></div><UsersRound/><h2>{String(item.partner)}</h2><p>{String(item.explanation)}</p><div><span><Star/> {String(item.rating)} rating</span><span>{Array.isArray(item.languages)?item.languages.join(', '):String(item.languages||'')}</span></div><button className="table-action">Review partner</button></article>)}{!matches.length&&<div className="portal-panel empty-state match-empty"><RefreshCcw/><strong>No suggestions generated</strong><span>Select a booking and generate explainable matches.</span></div>}</div>
+  </div>
+}

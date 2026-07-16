@@ -1,0 +1,25 @@
+import { AlertTriangle,CheckCircle2,Clock3,MapPin,Navigation,Phone,ShieldCheck } from 'lucide-react'
+import { useEffect,useMemo,useState } from 'react'
+import { api,dateTime } from '../lib/api'
+import { useAuth } from '../lib/auth'
+
+type Row=Record<string,unknown>
+const events=[
+  ['en_route','Partner en route',Navigation],['arrived','Arrived',MapPin],['appointment_started','Appointment started',Clock3],['returning_home','Returning home',Navigation],['safe_home','Safely completed',ShieldCheck],
+] as const
+
+export default function LiveJourney(){
+  const {user}=useAuth();const [bookings,setBookings]=useState<Row[]>([]);const [selected,setSelected]=useState('');const [milestones,setMilestones]=useState<Row[]>([]);const [error,setError]=useState('');const [notice,setNotice]=useState('');const [busy,setBusy]=useState(false)
+  useEffect(()=>{void api<{items:Row[]}>('/api/data?module=bookings').then(r=>{const active=r.items.filter(item=>['matched','confirmed','in_progress','incident'].includes(String(item.status)));setBookings(active);setSelected(String(active[0]?.id||''))}).catch(e=>setError((e as Error).message))},[])
+  useEffect(()=>{if(!selected)return;void Promise.resolve().then(()=>api<{items:Row[]}>(`/api/platform?module=journey&bookingId=${selected}`)).then(r=>setMilestones(r.items)).catch(e=>setError((e as Error).message))},[selected])
+  const booking=useMemo(()=>bookings.find(item=>item.id===selected),[bookings,selected])
+  async function update(event:string){setBusy(true);setError('');try{await api('/api/platform?module=journey',{method:'POST',body:JSON.stringify({bookingId:selected,event})});const r=await api<{items:Row[]}>(`/api/platform?module=journey&bookingId=${selected}`);setMilestones(r.items);setNotice('Journey updated. The permitted care circle has been notified.')}catch(e){setError((e as Error).message)}finally{setBusy(false)}}
+  async function sos(){setBusy(true);setError('');try{let coords:{latitude?:number;longitude?:number}={};if(navigator.geolocation)await new Promise<void>(resolve=>navigator.geolocation.getCurrentPosition(position=>{coords={latitude:position.coords.latitude,longitude:position.coords.longitude};resolve()},()=>resolve(),{timeout:4000}));await api('/api/platform?module=safety_alerts',{method:'POST',body:JSON.stringify({bookingId:selected,alertType:'sos',severity:'critical',details:'SOS raised from the live journey screen.',...coords})});setNotice('SOS sent to MitDir operations. If there is immediate danger, call 112.')}catch(e){setError((e as Error).message)}finally{setBusy(false)}}
+  const canUpdate=['partner','admin','operations'].includes(user!.role)
+  return <div className="portal-page"><div className="module-heading"><div><span className="portal-kicker">Live status</span><h1>Journey tracking</h1><p>See each stage from partner departure to a safe return home.</p></div><a className="button button--danger" href="tel:112"><Phone/>Emergency 112</a></div>
+    {notice&&<div className="portal-notice"><CheckCircle2/><span>{notice}</span></div>}{error&&<div className="portal-error">{error}</div>}
+    <div className="journey-layout"><section className="portal-panel"><label className="field"><span>Active booking</span><select value={selected} onChange={e=>setSelected(e.target.value)}><option value="">Select a booking…</option>{bookings.map(item=><option key={String(item.id)} value={String(item.id)}>{String(item.booking_number)} · {String(item.senior||item.service)}</option>)}</select></label>{booking?<div className="journey-summary"><span className={`table-badge table-badge--${booking.status}`}>{String(booking.status).replaceAll('_',' ')}</span><h2>{String(booking.service||'Support journey')}</h2><p><MapPin/>{String(booking.pickup_address||'Address recorded with booking')}</p><p><Clock3/>{dateTime(String(booking.scheduled_at))}</p><p><ShieldCheck/>{String(booking.partner||'Partner matching in progress')}</p></div>:<div className="empty-state"><Navigation/><strong>No active journey selected</strong><span>Confirmed and in-progress bookings appear here.</span></div>}
+      {booking&&canUpdate&&<><div className="journey-actions">{events.map(([event,label,Icon])=><button disabled={busy} key={event} onClick={()=>void update(event)}><Icon/><span>{label}</span></button>)}</div><button className="sos-button" disabled={busy} onClick={()=>void sos()}><AlertTriangle/><span><strong>SOS / urgent help</strong><small>Alert operations and configured emergency contacts</small></span></button></>}
+    </section><section className="portal-panel"><div className="panel-title"><div><span>Journey activity</span><h2>Live timeline</h2></div></div><div className="journey-timeline">{milestones.map(item=><div key={String(item.id)}><i><CheckCircle2/></i><span><strong>{String(item.label)}</strong><small>{dateTime(String(item.occurred_at||item.created_at))}{item.note?` · ${item.note}`:''}</small></span></div>)}{!milestones.length&&<div className="empty-state"><Clock3/><strong>Waiting for the first update</strong><span>Milestones will appear here in real time.</span></div>}</div></section></div>
+  </div>
+}
